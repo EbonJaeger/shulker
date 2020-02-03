@@ -24,7 +24,7 @@ rcon.port=<1-65535>
 Clone repository onto a server, edit ```config.json``` (see below for more info) and change any options, and then, in the repository folder:
 ```sh
 $ yarn
-$ yarn start
+$ yarn build && yarn start
 ```
 
 If you are running this locally, check the `IS_LOCAL_FILE` flag and related options below. Otherwise, perform the following command: 
