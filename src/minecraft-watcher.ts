@@ -46,7 +46,7 @@ export class Watcher {
             if (this.config.DEBUG) {
                 console.log('[DEBUG] A player has earned an advancement')
             }
-            return new Message(this.config.SERVER_NAME, line)
+            return new Message(this.config.SERVER_NAME, ':partying_face' + line)
         }
 
         // Check if the line is a player death (if enabled)
