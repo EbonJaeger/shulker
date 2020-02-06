@@ -1,4 +1,4 @@
-import { Client, Message, Channel, GuildChannel, TextChannel } from 'discord.js'
+import { Client, Message, TextChannel } from 'discord.js'
 import { Config } from './config'
 import { Rcon } from './rcon'
 import emojiStrip = require('emoji-strip')
@@ -47,15 +47,15 @@ export class Bot {
             }
             // Connect to RCON
             const rcon = new Rcon(this.config.MINECRAFT_SERVER_RCON_IP, this.config.MINECRAFT_SERVER_RCON_PORT, this.config.DEBUG)
-            rcon.Auth(this.config.MINECRAFT_SERVER_RCON_PASSWORD, () => {
+            rcon.auth(this.config.MINECRAFT_SERVER_RCON_PASSWORD, () => {
                 // Send a tellraw command to emulate a chat message
-                rcon.SendCommand('tellraw @a ' + this.makeMinecraftTellraw(message), (err: any) => {
+                rcon.sendCommand('tellraw @a ' + this.makeMinecraftTellraw(message), (err: any) => {
                     // Error while sending command
                     if (err) {
                         console.log('[ERROR]', err)
                     }
                     // Close the RCON connection
-                    rcon.Close()
+                    rcon.close()
                 })
             })
         })

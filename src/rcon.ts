@@ -29,7 +29,7 @@ export class Rcon {
         })
     }
 
-    Connect() {
+    connect() {
         this.socket.on('data', (data) => {
             const length = data.readInt32LE(0)
             const id = data.readInt32LE(4)
@@ -48,30 +48,30 @@ export class Rcon {
         })
     }
 
-    Close() {
+    close() {
         this.connected = false
         this.socket.end()
     }
 
-    Auth(pass: string, callback: Function) {
+    auth(pass: string, callback: Function) {
         if (this.authed) {
             throw new Error('already authed')
         }
 
         if (this.connected) {
-            this.SendPackage(3, pass, callback)
+            this.sendPackage(3, pass, callback)
         } else {
             this.socket.on('connect', () => {
-                this.SendPackage(3, pass, callback)
+                this.sendPackage(3, pass, callback)
             })
         }
     }
 
-    SendCommand(cmd: string, callback: Function) {
-        this.SendPackage(2, cmd, callback)
+    sendCommand(cmd: string, callback: Function) {
+        this.sendPackage(2, cmd, callback)
     }
 
-    private SendPackage(type: number, payload: string, callback: Function) {
+    private sendPackage(type: number, payload: string, callback: Function) {
         const id = this.nextId
         this.nextId++
 

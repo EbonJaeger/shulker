@@ -14,10 +14,13 @@
   },
   "keywords": [
     "Discord",
-    "Bot"
+    "Bot",
+    "Minecraft"
   ],
   "author": "destruc7i0n",
-  "contributors": ["EbonJaeger"],
+  "contributors": [
+    "EbonJaeger"
+  ],
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/EbonJaeger/shulker/issues"
