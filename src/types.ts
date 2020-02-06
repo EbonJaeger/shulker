@@ -1,4 +1,4 @@
-export class Message {
+export class MinecraftMessage {
     username: string
     message: string
 

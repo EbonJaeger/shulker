@@ -1,7 +1,7 @@
 import { Bot } from './bot'
 import { Config } from './config'
 import { Client } from 'discord.js'
-import { Message } from './types'
+import { MinecraftMessage } from './types'
 import { Watcher } from './minecraft-watcher'
 
 function fixUsername(username: string): string {
@@ -19,14 +19,14 @@ const bot = new Bot(c, client, c.DISCORD_TOKEN)
 const watcher = new Watcher(c)
 // Watch for messages to send to Discord when the bot is ready
 client.on('ready', () => {
-    watcher.watch((msg: Message) => {
+    watcher.watch((msg: MinecraftMessage) => {
         console.log('[INFO] Recieved a line from Minecraft')
         // TODO: Implement banned words
         if (c.DEBUG) {
             console.log(`[DEBUG] Username: '${msg.username}', Text: '${msg.message}'`)
         }
         // Send the message to Discord
-        bot.sendChannelMessage(msg.username, msg.message)
+        bot.sendChannelMessage(msg)
     })
 })
 // Log in to Discord

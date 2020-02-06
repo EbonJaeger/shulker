@@ -1,5 +1,5 @@
 import { Config } from './config'
-import { Message } from './types'
+import { MinecraftMessage } from './types'
 import { Tail } from 'tail'
 import express = require('express')
 import fs = require('fs')
@@ -16,7 +16,7 @@ export class Watcher {
     * @param line The line to parse.
     * @returns A Message object containing the sender and message body.
     */
-    parseLine(line: string): Message | undefined {
+    parseLine(line: string): MinecraftMessage | undefined {
         // Trim the time and thread prefix
         line = line.substring(33).trim()
         // Check if the line is a chat message
@@ -27,7 +27,7 @@ export class Watcher {
             // Split the message into parts
             const username = line.substring(1, line.indexOf('>'))
             const message = line.substring(line.indexOf(' ') + 1)
-            return new Message(username, message)
+            return new MinecraftMessage(username, message)
         }
 
         // Check if the line is a player joining or leaving (if enabled)
@@ -35,7 +35,7 @@ export class Watcher {
             if (this.config.DEBUG) {
                 console.log('[DEBUG] A player\'s connection status changed')
             }
-            return new Message(this.config.SERVER_NAME, line)
+            return new MinecraftMessage(this.config.SERVER_NAME, line)
         }
 
         // Check if the line is a player earning an advancement (if enabled)
@@ -46,7 +46,7 @@ export class Watcher {
             if (this.config.DEBUG) {
                 console.log('[DEBUG] A player has earned an advancement')
             }
-            return new Message(this.config.SERVER_NAME, ':partying_face' + line)
+            return new MinecraftMessage(this.config.SERVER_NAME, ':partying_face' + line)
         }
 
         // Check if the line is a player death (if enabled)
@@ -57,18 +57,18 @@ export class Watcher {
                     if (this.config.DEBUG) {
                         console.log('[DEBUG] A player died. Matched key word \"' + this.config.DEATH_KEY_WORDS[i] + "\"");
                     }
-                    return new Message(this.config.SERVER_NAME, ':skull: ' + line)
+                    return new MinecraftMessage(this.config.SERVER_NAME, ':skull: ' + line)
                 }
             }
         }
 
         // Check if the server has finished starting
         if (line.indexOf('Done (') !== -1) {
-            return new Message(this.config.SERVER_NAME, ':white_check_mark: Server has started')
+            return new MinecraftMessage(this.config.SERVER_NAME, ':white_check_mark: Server has started')
         }
         // Check if the server is shutting down
         if (line.indexOf('Stopping the server') !== -1) {
-            return new Message(this.config.SERVER_NAME, ':x: Server is shutting down')
+            return new MinecraftMessage(this.config.SERVER_NAME, ':x: Server is shutting down')
         }
         return (undefined)
     }

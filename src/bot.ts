@@ -1,5 +1,6 @@
 import { Client, Message, TextChannel } from 'discord.js'
 import { Config } from './config'
+import { MinecraftMessage } from './types'
 import { Rcon } from './rcon'
 import emojiStrip = require('emoji-strip')
 
@@ -154,10 +155,10 @@ export class Bot {
         return message
     }
 
-    sendChannelMessage(username: string, message: string) {
+    sendChannelMessage(msg: MinecraftMessage) {
         if (this.config.USE_WEBHOOKS) {
             // Create the webhook message
-            const webhook = this.makeDiscordWebhook(username, message)
+            const webhook = this.makeDiscordWebhook(msg.username, msg.message)
             // Send to the webhook URL
             axios.post(this.config.WEBHOOK_URL, {
                 ...webhook
@@ -172,7 +173,7 @@ export class Bot {
             // Make sure we have a channel
             if (channel) {
                 // Format the message
-                const formatted = this.makeDiscordMessage(username, message)
+                const formatted = this.makeDiscordMessage(msg.username, msg.message)
                 // Send the message
                 channel.send(formatted)
             } else {
