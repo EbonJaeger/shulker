@@ -42,8 +42,12 @@ export class Bot {
                 return
             }
             // Ignore messages with attachments
-            if (message.attachments) {
+            if (message.attachments.size > 0) {
                 return
+            }
+            // Log to console if debug is enabled
+            if (this.config.DEBUG) {
+                console.log("[DEBUG] Received a message from Discord")
             }
             // Connect to RCON
             const rcon = new Rcon(this.config.MINECRAFT_SERVER_RCON_IP, this.config.MINECRAFT_SERVER_RCON_PORT, this.config.DEBUG)

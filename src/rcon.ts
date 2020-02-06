@@ -25,7 +25,7 @@ export class Rcon {
         this.packages = []
         this.socket = net.connect(this.port, this.addr, () => {
             this.connected = true
-            console.log('[INFO] Authenticated with ' + this.addr + ':' + this.port)
+            console.log('[INFO] Connected to RCON on ' + this.addr + ':' + this.port)
         })
     }
 
@@ -80,7 +80,7 @@ export class Rcon {
         }
 
         const length = 14 + payload.length
-        const buff = new Buffer(length)
+        const buff = Buffer.alloc(length)
         buff.writeInt32LE(length - 4, 0)
         buff.writeInt32LE(id, 4)
         buff.writeInt32LE(type, 8)
