@@ -42,7 +42,7 @@ client.on('ready', () => {
 })
 // Log in to Discord
 bot.listen().then(() => {
-    logger.info("Logged in to Discord")
-}).catch((error) => {
-    logger.error("Error logging in to Discord: ", error)
+    logger.info('Logged in to Discord')
+}).catch((error: Error) => {
+    logger.error('Error logging in to Discord: ', error.stack)
 })

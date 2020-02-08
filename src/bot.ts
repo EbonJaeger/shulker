@@ -1,9 +1,9 @@
 import { Client, Message, TextChannel } from 'discord.js'
 import { Config } from './config'
 import { MinecraftMessage } from './types'
-import { Rcon } from './rcon'
 import emojiStrip = require('emoji-strip')
 import { logger } from './index'
+const Rcon = require('rcon')
 
 const axios = require('axios')
 
@@ -48,19 +48,24 @@ export class Bot {
                 return
             }
             logger.debug("Received a message from Discord")
-            // Connect to RCON
-            const rcon = new Rcon(this.config.MINECRAFT_SERVER_RCON_IP, this.config.MINECRAFT_SERVER_RCON_PORT)
-            rcon.auth(this.config.MINECRAFT_SERVER_RCON_PASSWORD, () => {
-                // Send a tellraw command to emulate a chat message
-                rcon.sendCommand('tellraw @a ' + this.makeMinecraftTellraw(message), (err: any) => {
-                    // Error while sending command
-                    if (err) {
-                        logger.error(`Error while sending command to Minecraft: ${err}`)
-                    }
-                    // Close the RCON connection
-                    rcon.close()
-                })
+            // Set up the RCON conenction
+            const host = this.config.MINECRAFT_SERVER_RCON_IP
+            const port = this.config.MINECRAFT_SERVER_RCON_PORT
+            const password = this.config.MINECRAFT_SERVER_RCON_PASSWORD
+            const conn = new Rcon(host, port, password, { challenge: false })
+            // Set up our handlers
+            conn.on('auth', async () => {
+                logger.info(`Authenticated with RCON at '${host}:${port}'`)
+                // Send message through RCON conenction
+                conn.send(`tellraw @a ${this.makeMinecraftTellraw(message)}`)
+                conn.disconnect()
+            }).on('end', () => {
+                logger.info(`Connection with '${host}:${port}' closed`)
+            }).on('error', (err: Error) => {
+                logger.error(`${err.stack}`)
             })
+            // Connect to the socket
+            conn.connect()
         })
         // Log in to Discord
         logger.info('Logging in to Discord...')

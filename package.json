@@ -35,6 +35,7 @@
     "discord.js": "^11.5.1",
     "emoji-strip": "^1.0.1",
     "express": "^4.17.1",
+    "rcon": "https://github.com/pushrax/node-rcon#9c05be5",
     "tail": "^2.0.3",
     "tslint-config-airbnb": "^5.11.2",
     "winston": "^3.2.1"

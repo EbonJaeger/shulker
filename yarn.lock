@@ -1665,6 +1665,15 @@ raw-body@2.4.0:
     iconv-lite "0.4.24"
     unpipe "1.0.0"
 
+rcon@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/rcon/-/rcon-1.0.3.tgz#d57ea3aa45c283ed546cec0d225980138d01d992"
+  integrity sha1-1X6jqkXCg+1UbOwNIlmAE40B2ZI=
+
+"rcon@https://github.com/pushrax/node-rcon#9c05be5":
+  version "1.0.3"
+  resolved "https://github.com/pushrax/node-rcon#9c05be51b0ee48d6877cf7b52e8bd6edf0a3f555"
+
 read-pkg-up@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/read-pkg-up/-/read-pkg-up-2.0.0.tgz#6b72a8048984e0c41e79510fd5e9fa99b3b549be"
