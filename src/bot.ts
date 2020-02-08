@@ -3,6 +3,7 @@ import { Config } from './config'
 import { MinecraftMessage } from './types'
 import { Rcon } from './rcon'
 import emojiStrip = require('emoji-strip')
+import { logger } from './index'
 
 const axios = require('axios')
 
@@ -46,18 +47,15 @@ export class Bot {
             if (message.attachments.size > 0) {
                 return
             }
-            // Log to console if debug is enabled
-            if (this.config.DEBUG) {
-                console.log("[DEBUG] Received a message from Discord")
-            }
+            logger.debug("Received a message from Discord")
             // Connect to RCON
-            const rcon = new Rcon(this.config.MINECRAFT_SERVER_RCON_IP, this.config.MINECRAFT_SERVER_RCON_PORT, this.config.DEBUG)
+            const rcon = new Rcon(this.config.MINECRAFT_SERVER_RCON_IP, this.config.MINECRAFT_SERVER_RCON_PORT)
             rcon.auth(this.config.MINECRAFT_SERVER_RCON_PASSWORD, () => {
                 // Send a tellraw command to emulate a chat message
                 rcon.sendCommand('tellraw @a ' + this.makeMinecraftTellraw(message), (err: any) => {
                     // Error while sending command
                     if (err) {
-                        console.log('[ERROR]', err)
+                        logger.error(`Error while sending command to Minecraft: ${err}`)
                     }
                     // Close the RCON connection
                     rcon.close()
@@ -65,6 +63,7 @@ export class Bot {
             })
         })
         // Log in to Discord
+        logger.info('Logging in to Discord...')
         return this.client.login(this.token)
     }
 
@@ -177,7 +176,7 @@ export class Bot {
                 // Send the message
                 channel.send(formatted)
             } else {
-                console.warn("Unable to find the Discord channel to send to!")
+                logger.warn("Unable to find the Discord channel to send to!")
             }
         }
     }

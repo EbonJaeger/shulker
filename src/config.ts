@@ -18,10 +18,8 @@ export interface Config {
     ALLOW_USER_MENTIONS: boolean
 
     WEBHOOK: string
-    REGEX_MATCH_CHAT_MC: string
-    REGEX_IGNORED_CHAT: string
     RCON_RECONNECT_DELAY: number
-    DEBUG: boolean
+    loggingLevel: string
 
     SERVER_NAME: string
     SHOW_PLAYER_CONN_STAT: boolean

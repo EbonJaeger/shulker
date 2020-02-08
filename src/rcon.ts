@@ -1,9 +1,8 @@
 // Credits to M4GNV5 for this library to reduce dependencies
-
+import { logger } from './index'
 import net = require('net')
 
 export class Rcon {
-    debug: boolean
     timeout: number
     nextId: number
     addr: string
@@ -13,10 +12,9 @@ export class Rcon {
     packages: any
     socket: net.Socket
 
-    constructor(addr: string, port: number, debug: boolean) {
+    constructor(addr: string, port: number) {
         this.addr = addr
         this.port = port
-        this.debug = debug
 
         this.timeout = 5000
         this.nextId = 0
@@ -25,7 +23,7 @@ export class Rcon {
         this.packages = []
         this.socket = net.connect(this.port, this.addr, () => {
             this.connected = true
-            console.log('[INFO] Connected to RCON on ' + this.addr + ':' + this.port)
+            logger.info('Connected to RCON on ' + this.addr + ':' + this.port)
         })
     }
 
@@ -39,12 +37,14 @@ export class Rcon {
             if (this.packages[id]) {
                 this.packages[id](type, response)
             } else {
-                console.log('unexpected rcon response', id, type, response)
+                logger.warn('Unexpected RCON response:', id, type, response)
             }
+        }).on('close', () => {
+            logger.info(`Closed connection to RCON at '${this.addr}:${this.port}'`)
         }).on('end', () => {
-            if (this.debug) {
-                console.log('[DEBUG] Rcon closed!')
-            }
+            logger.warn(`Remote RCON at '${this.addr}:${this.port}' closed the connection`)
+        }).on('timeout', () => {
+            this.close()
         })
     }
 
@@ -55,7 +55,7 @@ export class Rcon {
 
     auth(pass: string, callback: Function) {
         if (this.authed) {
-            throw new Error('already authed')
+            throw new Error('Already authenticated with RCON')
         }
 
         if (this.connected) {
@@ -99,9 +99,7 @@ export class Rcon {
         this.packages[id] = (type: number, response: Express.Response) => {
             clearTimeout(timeout)
             const err = type >= 0 ? false : 'Server sent package code ' + type
-            if (this.debug) {
-                console.log('[DEBUG] Recieved response: ' + response)
-            }
+            logger.debug('Recieved RCON response: ' + response)
             callback(err, response, type)
         }
     }

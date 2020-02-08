@@ -1,6 +1,7 @@
 build/
 node_modules/
 package-lock.json
+shulker-error.log
 yarn-error.log
 
 .idea

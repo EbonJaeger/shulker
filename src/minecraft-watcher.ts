@@ -1,6 +1,7 @@
 import { Config } from './config'
 import { MinecraftMessage } from './types'
 import { Tail } from 'tail'
+import { logger } from './index'
 import express = require('express')
 import fs = require('fs')
 
@@ -21,9 +22,7 @@ export class Watcher {
         line = line.substring(33).trim()
         // Check if the line is a chat message
         if (line.startsWith('<')) {
-            if (this.config.DEBUG) {
-                console.log('[DEBUG] A player sent a chat message')
-            }
+            logger.debug('A Minecraft player sent a chat message')
             // Split the message into parts
             const username = line.substring(1, line.indexOf('>'))
             const message = line.substring(line.indexOf(' ') + 1)
@@ -32,9 +31,7 @@ export class Watcher {
 
         // Check if the line is a player joining or leaving (if enabled)
         if (this.config.SHOW_PLAYER_CONN_STAT && (line.indexOf('joined the game') !== -1 || line.indexOf('left the game') !== -1)) {
-            if (this.config.DEBUG) {
-                console.log('[DEBUG] A player\'s connection status changed')
-            }
+            logger.debug('A player\'s connection status changed')
             return new MinecraftMessage(this.config.SERVER_NAME, line)
         }
 
@@ -43,9 +40,7 @@ export class Watcher {
             line.indexOf('has made the advancement') !== -1 ||
             line.indexOf('has completed the challenge') !== -1 ||
             line.indexOf('has reached the goal') !== -1)) {
-            if (this.config.DEBUG) {
-                console.log('[DEBUG] A player has earned an advancement')
-            }
+            logger.debug('A player has earned an advancement')
             return new MinecraftMessage(this.config.SERVER_NAME, ':partying_face' + line)
         }
 
@@ -54,9 +49,7 @@ export class Watcher {
             // Check for a match of any DEATH_KEY_WORDS
             for (var i = 0; i < this.config.DEATH_KEY_WORDS.length; i++) {
                 if (line.indexOf(this.config.DEATH_KEY_WORDS[i]) !== -1) {
-                    if (this.config.DEBUG) {
-                        console.log('[DEBUG] A player died. Matched key word \"' + this.config.DEATH_KEY_WORDS[i] + "\"");
-                    }
+                    logger.debug(`A Minecraft player died. Matched key word "${this.config.DEATH_KEY_WORDS[i]}"`);
                     return new MinecraftMessage(this.config.SERVER_NAME, ':skull: ' + line)
                 }
             }
@@ -64,10 +57,12 @@ export class Watcher {
 
         // Check if the server has finished starting
         if (line.indexOf('Done (') !== -1) {
+            logger.debug('Minecraft server has finished starting')
             return new MinecraftMessage(this.config.SERVER_NAME, ':white_check_mark: Server has started')
         }
         // Check if the server is shutting down
         if (line.indexOf('Stopping the server') !== -1) {
+            logger.debug('Minecraft server has shut down')
             return new MinecraftMessage(this.config.SERVER_NAME, ':x: Server is shutting down')
         }
         return (undefined)
@@ -82,10 +77,10 @@ export class Watcher {
             // Check that the server log file exists
             let tail: Tail
             if (fs.existsSync(this.config.LOCAL_FILE_PATH)) {
-                console.log('[INFO] Using configuration for Minecraft server log at "' + this.config.LOCAL_FILE_PATH + '"')
+                logger.info(`Using configuration for Minecraft server log at "${this.config.LOCAL_FILE_PATH}"`)
                 tail = new Tail(this.config.LOCAL_FILE_PATH)
             } else {
-                throw new Error('[ERROR] Minecraft server log not found at "' + this.config.LOCAL_FILE_PATH + '"')
+                throw new Error(`Minecraft server log not found at "${this.config.LOCAL_FILE_PATH}"`)
             }
             // Get the last line in the log file
             tail.on('line', (raw: string) => {
@@ -116,7 +111,7 @@ export class Watcher {
             const serverport = process.env.PORT || this.config.PORT
             // Listen on our server port
             http.listen(serverport, () => {
-                console.log('[INFO] Bot listening on *:' + serverport)
+                logger.info(`Bot listening for Minecraft messages on *:${serverport}`)
             })
             // POST the received line to our webhook
             app.post(this.config.WEBHOOK, (request: express.Request, response: express.Response) => {
