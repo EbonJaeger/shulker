@@ -1,26 +1,21 @@
+import axios from 'axios'
 import { Client, Message, TextChannel } from 'discord.js'
-import { Config } from './config'
 import { MinecraftMessage } from './types'
-import emojiStrip = require('emoji-strip')
-import { logger } from './index'
+import emojiStrip from 'emoji-strip'
+import { config, logger } from './index'
 const Rcon = require('rcon')
 
-const axios = require('axios')
-
 export class Bot {
-    private config: Config
     private client: Client
     private readonly token: string
 
     /**
      * Create a new Discord bot instance.
-     * @param config The configuration object to pull settings from.
      * @param client The Discord client to use.
      * @param token The Discord bot token to authenticate with.
      * @constructor
      */
-    constructor(config: Config, client: Client, token: string) {
-        this.config = config
+    constructor(client: Client, token: string) {
         this.client = client
         this.token = token
     }
@@ -32,11 +27,11 @@ export class Bot {
         // On message received
         this.client.on('message', (message: Message) => {
             // Only look at messages from the configured channel
-            if (message.channel.id !== this.config.DISCORD_CHANNEL_ID || message.channel.type !== 'text') {
+            if (message.channel.id !== config.DISCORD_CHANNEL_ID || message.channel.type !== 'text') {
                 return
             }
             // Ignore webhooks if using a webhook
-            if (this.config.USE_WEBHOOKS && message.webhookID) {
+            if (config.USE_WEBHOOKS && message.webhookID) {
                 return
             }
             // Ignore messages from bots
@@ -48,15 +43,14 @@ export class Bot {
                 return
             }
             logger.debug("Received a message from Discord")
-            // Set up the RCON conenction
-            const host = this.config.MINECRAFT_SERVER_RCON_IP
-            const port = this.config.MINECRAFT_SERVER_RCON_PORT
-            const password = this.config.MINECRAFT_SERVER_RCON_PASSWORD
+            // Create our RCON connection
+            const host = config.MINECRAFT_SERVER_RCON_IP
+            const port = config.MINECRAFT_SERVER_RCON_PORT
+            const password = config.MINECRAFT_SERVER_RCON_PASSWORD
             const conn = new Rcon(host, port, password, { challenge: false })
             // Set up our handlers
             conn.on('auth', async () => {
                 logger.info(`Authenticated with RCON at '${host}:${port}'`)
-                // Send message through RCON conenction
                 conn.send(`tellraw @a ${this.makeMinecraftTellraw(message)}`)
                 conn.disconnect()
             }).on('end', () => {
@@ -81,7 +75,7 @@ export class Bot {
     makeDiscordMessage(username: string, message: string): string {
         // Insert Discord mentions
         message = this.replaceDiscordMentions(message)
-        return this.config.DISCORD_MESSAGE_TEMPLATE
+        return config.DISCORD_MESSAGE_TEMPLATE
             .replace('%username%', username)
             .replace('%message%', message)
     }
@@ -97,7 +91,7 @@ export class Bot {
         // Get the avatar to use for this user
         var avatarURL = ''
         // Check if the message is from a player, or the server
-        if (username === this.config.SERVER_NAME + ' - Server') {
+        if (username === config.SERVER_NAME + ' - Server') {
             // Use avatar for the server
             avatarURL = `https://cdn6.aptoide.com/imgs/8/e/d/8ede957333544a11f75df4518b501bdb_icon.png?w=256`
         } else {
@@ -123,7 +117,7 @@ export class Bot {
         // hastily use JSON to encode the strings
         // TODO: Why?
         const variables = JSON.parse(JSON.stringify({ username, discriminator, text }))
-        return this.config.MINECRAFT_TELLRAW_TEMPLATE
+        return config.MINECRAFT_TELLRAW_TEMPLATE
             .replace('%username%', variables.username)
             .replace('%discriminator%', variables.discriminator)
             .replace('%message%', variables.text)
@@ -135,7 +129,7 @@ export class Bot {
      * @returns The message with mentions in it.
      */
     replaceDiscordMentions(message: string): string {
-        if (this.config.ALLOW_USER_MENTIONS) {
+        if (config.ALLOW_USER_MENTIONS) {
             // Check the message for mentions
             const possibleMentions = message.match(/@(\S+)/gim)
             if (possibleMentions) {
@@ -160,11 +154,11 @@ export class Bot {
     }
 
     sendChannelMessage(msg: MinecraftMessage) {
-        if (this.config.USE_WEBHOOKS) {
+        if (config.USE_WEBHOOKS) {
             // Create the webhook message
             const webhook = this.makeDiscordWebhook(msg.username, msg.message)
             // Send to the webhook URL
-            axios.post(this.config.WEBHOOK_URL, {
+            axios.post(config.WEBHOOK_URL, {
                 ...webhook
             }, {
                 headers: {
@@ -173,7 +167,7 @@ export class Bot {
             })
         } else {
             // find the channel
-            const channel = <TextChannel>this.client.channels.find((ch) => ch.id === this.config.DISCORD_CHANNEL_ID && ch.type === 'text')
+            const channel = <TextChannel>this.client.channels.find((ch) => ch.id === config.DISCORD_CHANNEL_ID && ch.type === 'text')
             // Make sure we have a channel
             if (channel) {
                 // Format the message

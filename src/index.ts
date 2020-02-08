@@ -7,10 +7,10 @@ import { createLogger, format, transports } from 'winston'
 
 // Initialize our config file
 const configFile = (process.argv.length > 2) ? process.argv[2] : '../config.json'
-const c: Config = require(configFile)
+export const config: Config = require(configFile)
 // Initialize our logger
 export const logger = createLogger({
-    level: c.loggingLevel,
+    level: config.loggingLevel,
     format: format.combine(
         format.timestamp({
             format: 'YYYY-MM-DD HH:mm:ss'
@@ -28,9 +28,9 @@ export const logger = createLogger({
 })
 // Create our Discord bot
 const client = new Client()
-const bot = new Bot(c, client, c.DISCORD_TOKEN)
+const bot = new Bot(client, config.DISCORD_TOKEN)
 // Create our Minecraft watcher
-const watcher = new Watcher(c)
+const watcher = new Watcher()
 // Watch for messages to send to Discord when the bot is ready
 client.on('ready', () => {
     watcher.watch((msg: MinecraftMessage) => {
