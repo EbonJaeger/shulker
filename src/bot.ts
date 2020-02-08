@@ -56,7 +56,11 @@ export class Bot {
             }).on('end', () => {
                 logger.info(`Connection with '${host}:${port}' closed`)
             }).on('error', (err: Error) => {
-                logger.error(`${err.stack}`)
+                if (err.message.indexOf('ECONNREFUSED') !== -1) {
+                    logger.warn(`RCON connection to ${host}:${port} was refused. Is the Minecraft server online?`)
+                } else {
+                    logger.error(`${err.stack}`)
+                }
             })
             // Connect to the socket
             conn.connect()
